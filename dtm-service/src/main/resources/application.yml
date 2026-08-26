@@ -1,0 +1,36 @@
+server:
+  port: 8081
+  shutdown: graceful
+spring:
+  application:
+    name: dtm-service
+  profiles:
+    active: ${POC_MODE:mock}
+  lifecycle:
+    timeout-per-shutdown-phase: 10s
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  info:
+    env:
+      enabled: true
+info:
+  app:
+    name: Central Feature Flag Decision Service
+    data: synthetic-only
+launchdarkly:
+  sdk-key: ${LD_SDK_KEY:}
+  initialization-timeout-ms: ${LD_INITIALIZATION_TIMEOUT_MS:3000}
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO}
+  structured:
+    format:
+      console: logstash
+

@@ -1,0 +1,126 @@
+name: centralized-banking-poc
+
+x-common-environment: &common-environment
+  POC_MODE: ${POC_MODE:-mock}
+  DTM_TIMEOUT_MS: ${DTM_TIMEOUT_MS:-700}
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+
+x-service-defaults: &service-defaults
+  restart: unless-stopped
+  networks: [banking-internal]
+  environment: *common-environment
+
+services:
+  dtm-service:
+    <<: *service-defaults
+    build:
+      context: .
+      target: dtm-service
+    environment:
+      <<: *common-environment
+      LD_SDK_KEY: ${LD_SDK_KEY:-}
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:8081/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 20s
+
+  payment-service:
+    <<: *service-defaults
+    build:
+      context: .
+      target: payment-service
+    depends_on:
+      dtm-service: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:8082/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 10s
+
+  customer-profile-service:
+    <<: *service-defaults
+    build:
+      context: .
+      target: customer-profile-service
+    depends_on:
+      dtm-service: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:8083/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 10s
+
+  fraud-service:
+    <<: *service-defaults
+    build:
+      context: .
+      target: fraud-service
+    depends_on:
+      dtm-service: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:8084/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 10s
+
+  notification-service:
+    <<: *service-defaults
+    build:
+      context: .
+      target: notification-service
+    depends_on:
+      dtm-service: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:8085/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 10s
+
+  web-gateway:
+    <<: *service-defaults
+    build:
+      context: .
+      target: web-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      <<: *common-environment
+      LD_CLIENT_SIDE_ID: ${LD_CLIENT_SIDE_ID:-}
+      LD_PROJECT_KEY: ${LD_PROJECT_KEY:-centrailized-banking}
+      LD_ENVIRONMENT_KEY: ${LD_ENVIRONMENT_KEY:-devolopment}
+      ENABLE_LD_ADMIN_CONTROLS: ${ENABLE_LD_ADMIN_CONTROLS:-false}
+      DEMO_ADMIN_PIN: ${DEMO_ADMIN_PIN:-}
+    depends_on:
+      payment-service: { condition: service_healthy }
+      customer-profile-service: { condition: service_healthy }
+      fraud-service: { condition: service_healthy }
+      notification-service: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:8080/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 10s
+
+  e2e-tests:
+    profiles: [e2e]
+    build:
+      context: .
+      target: e2e-tests
+    environment:
+      E2E_BASE_URL: http://web-gateway:8080
+    networks: [banking-internal]
+    depends_on:
+      web-gateway: { condition: service_healthy }
+    volumes:
+      - ./e2e-tests/screenshots:/workspace/e2e-tests/screenshots
+
+networks:
+  banking-internal:
+    driver: bridge

@@ -1,0 +1,16 @@
+server:
+  port: 8085
+  shutdown: graceful
+spring:
+  application.name: notification-service
+  profiles.active: ${POC_MODE:mock}
+dtm:
+  base-url: ${DTM_BASE_URL:http://dtm-service:8081}
+  timeout-ms: ${DTM_TIMEOUT_MS:700}
+management.endpoints.web.exposure.include: health,info
+management.endpoint.health.probes.enabled: true
+info.app.name: Synthetic Notification Service
+logging:
+  level.root: ${LOG_LEVEL:INFO}
+  structured.format.console: logstash
+

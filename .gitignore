@@ -1,0 +1,10 @@
+.env
+.idea/
+.vscode/*.log
+**/target/
+web-gateway/frontend/node_modules/
+web-gateway/frontend/dist/
+e2e-tests/screenshots/*.png
+playwright/.cache/
+*.log
+

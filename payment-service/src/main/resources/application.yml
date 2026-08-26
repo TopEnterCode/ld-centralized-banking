@@ -1,0 +1,17 @@
+server:
+  port: 8082
+  shutdown: graceful
+spring:
+  application.name: payment-service
+  profiles.active: ${POC_MODE:mock}
+  lifecycle.timeout-per-shutdown-phase: 10s
+dtm:
+  base-url: ${DTM_BASE_URL:http://dtm-service:8081}
+  timeout-ms: ${DTM_TIMEOUT_MS:700}
+management.endpoints.web.exposure.include: health,info
+management.endpoint.health.probes.enabled: true
+info.app.name: Synthetic Payment Service
+logging:
+  level.root: ${LOG_LEVEL:INFO}
+  structured.format.console: logstash
+

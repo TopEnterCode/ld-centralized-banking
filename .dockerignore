@@ -1,0 +1,9 @@
+.env
+.git
+.idea
+.vscode
+**/target
+**/node_modules
+e2e-tests/screenshots
+*.log
+

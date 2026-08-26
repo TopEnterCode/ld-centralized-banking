@@ -1,0 +1,31 @@
+server:
+  port: 8080
+  shutdown: graceful
+  error:
+    include-message: never
+spring:
+  application.name: web-gateway
+  profiles.active: ${POC_MODE:mock}
+  lifecycle.timeout-per-shutdown-phase: 10s
+poc.mode: ${POC_MODE:mock}
+dtm:
+  base-url: ${DTM_BASE_URL:http://dtm-service:8081}
+  timeout-ms: ${DTM_TIMEOUT_MS:700}
+services:
+  dtm: ${DTM_BASE_URL:http://dtm-service:8081}
+  payment: ${PAYMENT_BASE_URL:http://payment-service:8082}
+  profile: ${PROFILE_BASE_URL:http://customer-profile-service:8083}
+  fraud: ${FRAUD_BASE_URL:http://fraud-service:8084}
+  notification: ${NOTIFICATION_BASE_URL:http://notification-service:8085}
+  timeout-ms: ${SERVICE_TIMEOUT_MS:1600}
+launchdarkly:
+  client-side-id: ${LD_CLIENT_SIDE_ID:}
+  environment-key: ${LD_ENVIRONMENT_KEY:devolopment}
+  admin-controls-enabled: ${ENABLE_LD_ADMIN_CONTROLS:false}
+  admin-pin: ${DEMO_ADMIN_PIN:}
+management.endpoints.web.exposure.include: health,info
+management.endpoint.health.probes.enabled: true
+info.app.name: Centralized Banking Feature Control POC Web Gateway
+logging:
+  level.root: ${LOG_LEVEL:INFO}
+  structured.format.console: logstash

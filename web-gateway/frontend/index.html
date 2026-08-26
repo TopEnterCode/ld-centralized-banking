@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Synthetic banking feature control proof of concept" />
+    <title>Centralized Banking Feature Control POC</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div class="brand-copy">
+          <p class="eyebrow">CENTRALIZED FEATURE DELIVERY</p>
+          <h1>Banking Feature Control <em>POC</em></h1>
+        </div>
+        <div class="topbar-status">
+          <span class="synthetic-label">POC – SYNTHETIC DATA</span>
+          <span id="mode-badge" class="mode-badge mock">MOCK MODE</span>
+          <span id="connection-label" class="connection"><i></i> Connecting…</span>
+        </div>
+      </header>
+
+      <nav class="tabs" aria-label="POC views">
+        <button class="tab active" data-tab="demo">Live demo</button>
+        <button class="tab" data-tab="architecture">Architecture</button>
+        <button class="tab" data-tab="explanation">How it works</button>
+        <div class="tab-context"><span>Selected context</span><strong id="nav-persona">somchai-employee</strong></div>
+      </nav>
+
+      <main>
+        <section id="view-demo" class="view active" aria-label="Interactive banking demo">
+          <div class="demo-layout">
+            <article class="phone-column">
+              <div class="section-kicker"><span>01</span> Mobile banking simulator</div>
+              <div class="phone-shell">
+                <div class="phone-sensor"></div>
+                <div class="phone-screen">
+                  <div class="mobile-head">
+                    <div class="mobile-logo">SB</div>
+                    <div><small>Good afternoon</small><strong id="phone-name">Synthetic customer</strong></div>
+                    <button aria-label="Synthetic notifications" class="icon-button">●</button>
+                  </div>
+                  <div id="account-card" class="account-card">
+                    <div class="account-title"><span>Everyday account</span><small>DEMO •••• 2048</small></div>
+                    <p class="balance-label">Available balance</p>
+                    <p class="balance">฿245,680<span>.50</span></p>
+                    <div class="account-actions"><span>↑<small>Pay</small></span><span>↓<small>Receive</small></span><span>⋯<small>More</small></span></div>
+                  </div>
+                  <div id="payment-panel" class="payment-panel">
+                    <div class="feature-heading">
+                      <div><span id="ui-version-chip">LEGACY UI</span><h2 id="payment-heading">Quick transfer</h2></div>
+                      <span id="client-flag-dot" class="flag-dot off" title="Client flag off"></span>
+                    </div>
+                    <label for="recipient">Synthetic recipient</label>
+                    <input id="recipient" value="Demo Merchant – Riverside" maxlength="60" />
+                    <label for="amount">Amount (THB)</label>
+                    <div class="money-input"><span>฿</span><input id="amount" type="number" min="1" max="50000" step="0.01" value="1250.00" /></div>
+                    <div id="new-ui-benefit" class="smart-review hidden"><span>✦</span><div><strong>Smart payment review</strong><small>New UI enabled by a browser flag</small></div></div>
+                    <button id="submit-payment" class="primary-action">Review &amp; send</button>
+                    <p class="safety-note">Simulation only · No authentication or money movement</p>
+                  </div>
+                  <div id="payment-result" class="payment-result hidden" aria-live="polite">
+                    <div class="success-ring">✓</div>
+                    <h2>Payment simulated</h2>
+                    <p id="result-reference">SYN-REFERENCE</p>
+                    <div class="result-route"><span>Authoritative API</span><strong id="result-version">v1</strong></div>
+                    <button id="new-payment" class="secondary-action">New simulation</button>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <aside class="control-panel" aria-label="Presenter control panel">
+              <div class="panel-heading">
+                <div><p class="eyebrow">PRESENTER CONTROLS</p><h2>Change behavior live</h2></div>
+                <button class="reset-button" data-action="reset" data-value="">↻ Reset demo</button>
+              </div>
+              <div class="control-scroll">
+                <section class="control-group">
+                  <div class="control-label"><span>1</span><div><strong>Audience targeting</strong><small>Individual and reusable segments</small></div></div>
+                  <label class="select-label" for="persona-select">Synthetic persona</label>
+                  <select id="persona-select">
+                    <option value="somchai-employee">Somchai · employee · preferred</option>
+                    <option value="mali-pilot">Mali · pilot customer · iOS</option>
+                    <option value="narin-general">Narin · general customer</option>
+                  </select>
+                  <div class="button-grid">
+                    <button data-action="target-individual" data-dynamic-persona="true">Target individual</button>
+                    <button data-action="target-employee" data-value="true">Employee segment</button>
+                    <button data-action="target-pilot" data-value="true">Pilot segment</button>
+                  </div>
+                </section>
+                <section class="control-group">
+                  <div class="control-label"><span>2</span><div><strong>Percentage rollout</strong><small>Stable SHA-256 assignment</small></div></div>
+                  <div class="segmented four">
+                    <button data-action="rollout" data-value="0">0%</button><button data-action="rollout" data-value="10">10%</button><button data-action="rollout" data-value="50">50%</button><button data-action="rollout" data-value="100">100%</button>
+                  </div>
+                </section>
+                <section class="control-group">
+                  <div class="control-label"><span>3</span><div><strong>Payment API migration</strong><small>Dual-run comparison and authority</small></div></div>
+                  <div class="segmented four migration">
+                    <button data-action="migration" data-value="off">Off</button><button data-action="migration" data-value="shadow">Shadow</button><button data-action="migration" data-value="live">Live</button><button data-action="migration" data-value="complete">Complete</button>
+                  </div>
+                </section>
+                <section class="control-group">
+                  <div class="control-label"><span>4</span><div><strong>Safety controls</strong><small>Rollback and failure injection</small></div></div>
+                  <div class="button-grid danger-grid">
+                    <button data-action="kill-switch" data-value="true">Activate kill switch</button>
+                    <button data-action="kill-switch" data-value="false">Deactivate kill switch</button>
+                    <button data-action="provider-failure" data-value="true">Simulate LD failure</button>
+                    <button data-action="dtm-failure" data-value="true">Simulate DTM failure</button>
+                    <button data-action="dtm-timeout" data-value="2500">Simulate DTM timeout</button>
+                    <button data-action="payment-v2-failure" data-value="true">Payment v2 failure</button>
+                    <button data-action="notification-b-failure" data-value="true">Provider B failure</button>
+                    <button class="restore" data-action="restore-all" data-value="">Restore all services</button>
+                  </div>
+                </section>
+              </div>
+              <div id="control-toast" class="control-toast" aria-live="polite">Ready for presenter input</div>
+            </aside>
+
+            <section class="observability-column">
+              <article class="status-card">
+                <div class="card-heading"><div><p class="eyebrow">SYSTEM STATUS</p><h2>Backend service map</h2></div><span id="healthy-count">0/5 healthy</span></div>
+                <div class="service-map">
+                  <div class="service browser-node"><i></i><strong>Browser</strong><small id="browser-source">mock provider</small></div>
+                  <span class="connector">→</span>
+                  <div class="service gateway-node"><i></i><strong>Web gateway</strong><small>:8080</small></div>
+                  <span class="connector">→</span>
+                  <div class="service dtm-node" data-service="dtm"><i></i><strong>Central DTM</strong><small>checking</small></div>
+                </div>
+                <div class="downstream-services">
+                  <div class="service" data-service="profile"><i></i><strong>Profile</strong><small>checking</small></div>
+                  <div class="service" data-service="fraud"><i></i><strong>Fraud</strong><small>checking</small></div>
+                  <div class="service" data-service="payment"><i></i><strong>Payment</strong><small>checking</small></div>
+                  <div class="service" data-service="notification"><i></i><strong>Notify</strong><small>checking</small></div>
+                </div>
+              </article>
+
+              <article class="timeline-card">
+                <div class="card-heading"><div><p class="eyebrow">LIVE TRACE</p><h2>Decision timeline</h2></div><span id="correlation-id">No journey yet</span></div>
+                <div id="timeline" class="timeline empty">
+                  <div class="empty-state"><span>⌁</span><strong>Run a synthetic payment</strong><p>Every Java service decision will appear here with source, reason, and fallback status.</p></div>
+                </div>
+              </article>
+
+              <article class="rollout-card">
+                <div class="card-heading"><div><p class="eyebrow">VIRTUAL CUSTOMERS</p><h2>100-user rollout grid</h2></div><div class="rollout-count"><strong id="enabled-count">0</strong><span> enabled</span></div></div>
+                <div id="rollout-grid" class="rollout-grid" aria-label="Percentage rollout assignments"></div>
+                <div class="grid-legend"><span><i class="enabled"></i>New experience</span><span><i></i>Safe default</span><small id="disabled-count">100 disabled</small></div>
+              </article>
+            </section>
+          </div>
+        </section>
+
+        <section id="view-architecture" class="view info-view">
+          <div class="info-hero"><p class="eyebrow">REFERENCE ARCHITECTURE</p><h2>One decision plane. Six independently safe Java services.</h2><p>The browser evaluates one presentation-only flag. Every security-sensitive backend choice flows through the centralized Java DTM and has a local typed fallback.</p></div>
+          <div class="architecture-flow">
+            <div class="arch-node highlight"><span>01</span><strong>Browser banking POC</strong><small>Minimal TypeScript · client-side ID only</small></div>
+            <div class="arch-arrow"><span>client flag</span>→</div>
+            <div class="arch-node ld"><span>LD</span><strong>LaunchDarkly</strong><small>Streaming client + server SDK data</small></div>
+            <div class="arch-node gateway"><span>02</span><strong>Web Gateway</strong><small>Only host-exposed service · Java orchestration</small></div>
+            <div class="arch-arrow"><span>internal REST</span>→</div>
+            <div class="arch-node dtm"><span>03</span><strong>Central DTM</strong><small>Singleton LDClient · typed registry · reason</small></div>
+            <div class="arch-services">
+              <div><strong>Profile</strong><small>legacy ↔ v2</small></div><div><strong>Fraud</strong><small>engine v1 ↔ v2</small></div><div><strong>Payment</strong><small>migration + kill switch</small></div><div><strong>Notification</strong><small>provider A ↔ B</small></div>
+            </div>
+          </div>
+          <div class="principle-grid">
+            <article><span>◈</span><h3>Central governance</h3><p>One typed registry and provider boundary standardize evaluation metadata without coupling services to the vendor SDK.</p></article>
+            <article><span>⌁</span><h3>Local resilience</h3><p>Short timeout, retry, circuit breaker, and documented local defaults stop a control-plane issue from becoming a banking outage.</p></article>
+            <article><span>◎</span><h3>Privacy by design</h3><p>Only synthetic context attributes are used. Server SDK keys and API tokens never cross the Java boundary.</p></article>
+          </div>
+        </section>
+
+        <section id="view-explanation" class="view info-view">
+          <div class="info-hero"><p class="eyebrow">PRESENTER NOTES</p><h2>What each scenario proves</h2><p>Use the controls in order; each scenario changes behavior immediately without deployment or restart.</p></div>
+          <div class="explanation-grid">
+            <article><span>01</span><div><h3>Individual &amp; segment targeting</h3><p>Select Somchai for the employee rule, Mali for the pilot cohort, or target exactly one synthetic key. The reason is explicit in the timeline.</p></div></article>
+            <article><span>02</span><div><h3>Stable percentage rollout</h3><p>The 100-user grid uses deterministic SHA-256 bucketing in Mock Mode. Repeating the same percentage keeps every user's assignment stable.</p></div></article>
+            <article><span>03</span><div><h3>Four-stage API migration</h3><p>Shadow returns v1 while comparing v2. Live returns v2 while comparing v1. Complete removes the dual call. The route is visible end-to-end.</p></div></article>
+            <article><span>04</span><div><h3>Kill switch</h3><p>Disabling payment v2 makes v1 authoritative immediately—even if migration is Live or Complete. It is a safety control, never authorization.</p></div></article>
+            <article><span>05</span><div><h3>Failure without cascading</h3><p>Provider failure uses SDK defaults; DTM timeout or outage opens service circuit breakers and uses local defaults. The UI says degraded instead of claiming success from LaunchDarkly.</p></div></article>
+            <article><span>06</span><div><h3>Credential separation</h3><p>The browser receives only a client-side ID and one allowed flag. The SDK key remains in DTM; the API token is reserved for guarded server-side administration.</p></div></article>
+          </div>
+          <div class="scope-callout"><strong>Important boundary</strong><p>Feature flags control feature delivery and routing. They do not authenticate customers, authorize payments, validate limits, or replace transaction controls.</p></div>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="/src/app.ts"></script>
+  </body>
+</html>
+
