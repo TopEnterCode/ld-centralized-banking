@@ -5,6 +5,7 @@
 ```text
 Browser (minimal TypeScript)
   ├─ client-new-payment-ui ───────────────> LaunchDarkly client endpoint (Live only)
+  ├─ client-new-home-experience ──────────> LaunchDarkly client endpoint (Live only)
   └─ HTTPS/HTTP :8080 ────────────────────> Web Gateway (Spring Boot)
                                                 │
                  ┌──────────────────────────────┼──────────────────────────────┐
@@ -23,12 +24,14 @@ Only web gateway maps a host port. `dtm-service` and all domain services remain 
 ## Decision path
 
 1. Gateway creates one correlation ID for the synthetic journey.
-2. Profile requests `profile-response-v2` from DTM.
-3. Fraud requests `fraud-engine-version` from DTM.
-4. Payment requests `payment-api-migration` and `payment-v2-enabled` from DTM.
-5. Notification requests `notification-provider` from DTM.
-6. Each domain response contains safe decision metadata; gateway turns it into the visible timeline.
-7. Browser `client-new-payment-ui` changes presentation only. Java still validates the request and owns the workflow.
+2. Gateway evaluates `maintenance-banner` before starting a synthetic write journey.
+3. If maintenance is enabled, the browser screen and Gateway guard use the same typed JSON maintenance configuration, and no downstream write services are called.
+4. Profile requests `profile-response-v2` from DTM.
+5. Fraud requests `fraud-engine-version` from DTM.
+6. Payment requests `payment-api-migration` and `payment-v2-enabled` from DTM.
+7. Notification requests `notification-provider` from DTM.
+8. Each domain response contains safe decision metadata; gateway turns it into the visible timeline.
+9. Browser `client-new-payment-ui` and `client-new-home-experience` change presentation only. Java still validates the request and owns the workflow.
 
 ## DTM design
 
@@ -72,5 +75,6 @@ The Java SDK supports native migration APIs, but this POC uses a typed string be
 - a Mock adapter that calls the safe gateway flag endpoint and never claims LaunchDarkly as source;
 - a Live adapter using `@launchdarkly/js-client-sdk`, a three-second initialization timeout, multi-context identification, and `change:client-new-payment-ui` subscription.
 
-The runtime endpoint returns the client-side ID only in live mode and lists only `client-new-payment-ui`. SDK keys and API tokens have no serializer or browser path.
+The runtime endpoint returns the client-side ID only in live mode and lists only the two registered frontend flags. SDK keys and API tokens have no serializer or browser path.
 
+Maintenance is intentionally server-governed: the browser reads a typed status from the Gateway, while the Gateway evaluates the non-client-side JSON `maintenance-banner` through DTM and enforces the guard before downstream calls.

@@ -3,6 +3,7 @@ package com.example.banking.gateway;
 import com.example.banking.contracts.FlagEvaluationResponse;
 import com.example.banking.contracts.FlagKey;
 import com.example.banking.contracts.JourneyContracts;
+import com.example.banking.contracts.MaintenanceContracts;
 import com.example.banking.contracts.SyntheticContext;
 import com.example.banking.contracts.SyntheticPersonas;
 import com.example.banking.support.FlagDecisionClient;
@@ -56,7 +57,11 @@ public class DemoGatewayController {
         response.put("mode", live ? "launchdarkly" : "mock");
         response.put("modeLabel", live ? "LAUNCHDARKLY LIVE" : "MOCK MODE");
         response.put("clientSideId", live ? clientSideId : "");
-        response.put("clientFlagKeys", List.of(FlagKey.CLIENT_NEW_PAYMENT_UI.key()));
+        response.put(
+                "clientFlagKeys",
+                List.of(
+                        FlagKey.CLIENT_NEW_PAYMENT_UI.key(),
+                        FlagKey.CLIENT_NEW_HOME_EXPERIENCE.key()));
         response.put("clientSdkConfigured", live && !clientSideId.isBlank());
         response.put(
                 "adminControlsAvailable",
@@ -97,14 +102,33 @@ public class DemoGatewayController {
         return orchestrator.run(request);
     }
 
+    @GetMapping("/maintenance/{personaKey}")
+    MaintenanceContracts.Status maintenance(@PathVariable String personaKey) {
+        SyntheticContext context = context(personaKey);
+        var evaluation =
+                flagDecisionClient.evaluate(
+                        FlagKey.MAINTENANCE_BANNER, context, UUID.randomUUID().toString());
+        return new MaintenanceContracts.Status(
+                MaintenanceContracts.Configuration.from(evaluation.value()),
+                com.example.banking.contracts.DecisionMetadata.from("web-gateway", evaluation));
+    }
+
     @PostMapping("/browser/evaluate")
     FlagEvaluationResponse browserEvaluate(@Valid @RequestBody BrowserEvaluation request) {
-        if (!FlagKey.CLIENT_NEW_PAYMENT_UI.key().equals(request.flagKey())) {
+        FlagKey flag =
+                FlagKey.fromKey(request.flagKey())
+                        .filter(FlagKey::clientSide)
+                        .orElseThrow(
+                                () ->
+                                        new ResponseStatusException(
+                                                HttpStatus.FORBIDDEN,
+                                                "Only registered client-side flags may be requested"));
+        if (flag.type() != com.example.banking.contracts.FlagValueType.BOOLEAN) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN, "Only registered client-side flags may be requested");
         }
         return flagDecisionClient.evaluate(
-                FlagKey.CLIENT_NEW_PAYMENT_UI,
+                flag,
                 request.context(),
                 Optional.ofNullable(request.correlationId())
                         .filter(value -> !value.isBlank())
@@ -139,6 +163,11 @@ public class DemoGatewayController {
                 "assignments", assignments,
                 "enabledCount", enabled,
                 "disabledCount", assignments.size() - enabled);
+    }
+
+    @GetMapping("/monitoring")
+    Map<String, Object> monitoring() {
+        return MonitoringData.snapshot("launchdarkly".equals(mode) ? "launchdarkly" : "mock");
     }
 
     private SyntheticContext context(String key) {

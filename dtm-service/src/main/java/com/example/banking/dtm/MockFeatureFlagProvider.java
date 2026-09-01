@@ -4,6 +4,7 @@ import com.example.banking.contracts.DecisionSource;
 import com.example.banking.contracts.FlagKey;
 import com.example.banking.contracts.SyntheticContext;
 import com.fasterxml.jackson.databind.node.BooleanNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.TextNode;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -37,12 +38,31 @@ public final class MockFeatureFlagProvider implements FeatureFlagProvider {
         }
         if (flag == FlagKey.MAINTENANCE_BANNER) {
             return new ProviderDecision(
-                    flag.safeFallback(), "mock maintenance default", DecisionSource.MOCK, false);
+                    JsonNodeFactory.instance
+                            .objectNode()
+                            .put("enabled", state.maintenanceEnabled())
+                            .put("mode", "read-only")
+                            .put("title", "Scheduled maintenance")
+                            .put(
+                                    "message",
+                                    state.maintenanceEnabled()
+                                            ? "Transfers are temporarily paused while we perform maintenance."
+                                            : "Services are operating normally.")
+                            .put(
+                                    "eta",
+                                    state.maintenanceEnabled()
+                                            ? "Expected recovery: shortly"
+                                            : "No maintenance scheduled"),
+                    state.maintenanceEnabled()
+                            ? "presenter maintenance mode is active"
+                            : "presenter maintenance mode is inactive",
+                    DecisionSource.MOCK,
+                    false);
         }
 
         AudienceMatch audience = matchAudience(flag, context);
         return switch (flag) {
-            case CLIENT_NEW_PAYMENT_UI, PROFILE_RESPONSE_V2 ->
+            case CLIENT_NEW_PAYMENT_UI, CLIENT_NEW_HOME_EXPERIENCE, PROFILE_RESPONSE_V2 ->
                     decision(BooleanNode.valueOf(audience.enabled()), audience.reason());
             case FRAUD_ENGINE_VERSION ->
                     decision(TextNode.valueOf(audience.enabled() ? "v2" : "v1"), audience.reason());

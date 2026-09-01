@@ -2,12 +2,15 @@ package com.example.banking.contracts;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.Arrays;
 import java.util.Optional;
 
 public enum FlagKey {
     CLIENT_NEW_PAYMENT_UI("client-new-payment-ui", FlagValueType.BOOLEAN, BooleanNode.FALSE, true),
+    CLIENT_NEW_HOME_EXPERIENCE(
+            "client-new-home-experience", FlagValueType.BOOLEAN, BooleanNode.FALSE, true),
     PROFILE_RESPONSE_V2("profile-response-v2", FlagValueType.BOOLEAN, BooleanNode.FALSE, false),
     PAYMENT_API_MIGRATION(
             "payment-api-migration", FlagValueType.STRING, TextNode.valueOf("off"), false),
@@ -19,7 +22,13 @@ public enum FlagKey {
     MAINTENANCE_BANNER(
             "maintenance-banner",
             FlagValueType.JSON,
-            TextNode.valueOf("{\"enabled\":false}"),
+            JsonNodeFactory.instance
+                    .objectNode()
+                    .put("enabled", false)
+                    .put("mode", "read-only")
+                    .put("title", "Scheduled maintenance")
+                    .put("message", "Services are operating normally.")
+                    .put("eta", "No maintenance scheduled"),
             false);
 
     private final String key;

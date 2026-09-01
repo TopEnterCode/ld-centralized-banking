@@ -19,7 +19,8 @@ class RuntimeSecretBoundaryTest {
                         "poc");
 
         String response = controller.runtime().toString();
-        assertThat(response).contains("client-side-123", "client-new-payment-ui");
+        assertThat(response)
+                .contains("client-side-123", "client-new-payment-ui", "client-new-home-experience");
         assertThat(response).doesNotContain("sdkKey", "apiAccessToken", "LD_SDK_KEY");
     }
 }

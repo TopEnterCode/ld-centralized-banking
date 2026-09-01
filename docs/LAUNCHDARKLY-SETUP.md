@@ -35,14 +35,15 @@ Create the variations below and keep off variations equal to the safe fallbacks.
 | Key | Kind | Variations | Off/default | Browser SDK availability |
 |---|---|---|---|---|
 | `client-new-payment-ui` | Boolean | false, true | false | Enable using Client-side ID |
+| `client-new-home-experience` | Boolean | false, true | false | Enable using Client-side ID |
 | `profile-response-v2` | Boolean | false, true | false | Disabled |
 | `payment-api-migration` | String | off, shadow, live, complete | off | Disabled |
 | `payment-v2-enabled` | Boolean | false, true | false | Disabled |
 | `fraud-engine-version` | String | v1, v2 | v1 | Disabled |
 | `notification-provider` | String | provider-a, provider-b | provider-a | Disabled |
-| `maintenance-banner` | Reserved | Not bootstrapped | n/a | No application consumer yet |
+| `maintenance-banner` | JSON | `enabled`, `mode`, `title`, `message`, `eta` | `enabled=false` | Disabled |
 
-Only `client-new-payment-ui` is required by a browser SDK. Do not enable the server flags for client-side SDKs.
+Only `client-new-payment-ui` and `client-new-home-experience` are browser flags. Do not expose the server flags to client-side SDKs.
 
 ## Multi-context attributes
 
@@ -67,6 +68,8 @@ Suggested rule order for Boolean/v2 flags:
 3. `pilot-customers` segment → new/v2 variation;
 4. percentage rollout by `user.key` → new/v2 versus safe fallback;
 5. fallthrough → safe fallback.
+
+For `maintenance-banner`, target the `pilot-customers` segment to the enabled JSON variation. The browser shows the shared banner, and the Web Gateway blocks the synthetic write journey before calling downstream services. The safe JSON variation keeps the normal experience available.
 
 Use the same attribute and context kind for all percentage rules so assignments stay stable.
 

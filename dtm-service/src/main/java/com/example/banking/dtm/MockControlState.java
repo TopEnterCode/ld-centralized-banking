@@ -14,6 +14,7 @@ public final class MockControlState {
     private final AtomicInteger rolloutPercentage = new AtomicInteger(0);
     private final AtomicReference<String> migrationStage = new AtomicReference<>("off");
     private final AtomicBoolean killSwitch = new AtomicBoolean(false);
+    private final AtomicBoolean maintenanceEnabled = new AtomicBoolean(false);
     private final AtomicBoolean providerUnavailable = new AtomicBoolean(false);
     private final AtomicBoolean dtmUnavailable = new AtomicBoolean(false);
     private final AtomicInteger delayMs = new AtomicInteger(0);
@@ -25,6 +26,7 @@ public final class MockControlState {
         rolloutPercentage.set(0);
         migrationStage.set("off");
         killSwitch.set(false);
+        maintenanceEnabled.set(false);
         providerUnavailable.set(false);
         dtmUnavailable.set(false);
         delayMs.set(0);
@@ -78,6 +80,14 @@ public final class MockControlState {
         killSwitch.set(value);
     }
 
+    public boolean maintenanceEnabled() {
+        return maintenanceEnabled.get();
+    }
+
+    public void maintenanceEnabled(boolean value) {
+        maintenanceEnabled.set(value);
+    }
+
     public boolean providerUnavailable() {
         return providerUnavailable.get();
     }
@@ -110,6 +120,7 @@ public final class MockControlState {
                 "rolloutPercentage", rolloutPercentage(),
                 "migrationStage", migrationStage(),
                 "killSwitch", killSwitch(),
+                "maintenanceEnabled", maintenanceEnabled(),
                 "providerUnavailable", providerUnavailable(),
                 "dtmUnavailable", dtmUnavailable(),
                 "delayMs", delayMs());

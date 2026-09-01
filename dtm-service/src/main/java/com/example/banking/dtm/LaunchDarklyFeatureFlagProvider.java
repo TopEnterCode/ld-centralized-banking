@@ -56,7 +56,7 @@ public final class LaunchDarklyFeatureFlagProvider implements FeatureFlagProvide
     }
 
     private ProviderDecision jsonDecision(FlagKey flag, LDContext context) {
-        LDValue defaultValue = LDValue.parse(flag.safeFallback().asText());
+        LDValue defaultValue = LDValue.parse(flag.safeFallback().toString());
         EvaluationDetail<LDValue> detail =
                 client.jsonValueVariationDetail(flag.key(), context, defaultValue);
         try {

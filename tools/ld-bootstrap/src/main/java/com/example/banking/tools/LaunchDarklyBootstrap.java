@@ -55,6 +55,16 @@ public final class LaunchDarklyBootstrap {
                             List.of("mali-pilot"),
                             List.of("bank-employees", "pilot-customers")),
                     boolFlag(
+                            "client-new-home-experience",
+                            "Client New Home Experience",
+                            "A/B tests the synthetic banking home between standard and personalized experiences.",
+                            "Standard Home",
+                            "Personalized Home",
+                            true,
+                            true,
+                            List.of("mali-pilot"),
+                            List.of("bank-employees", "pilot-customers")),
+                    boolFlag(
                             "profile-response-v2",
                             "Profile Response V2",
                             "Selects the legacy or v2 synthetic customer profile response.",
@@ -97,6 +107,13 @@ public final class LaunchDarklyBootstrap {
                             List.of("provider-a", "provider-b"),
                             "provider-a",
                             "provider-b",
+                            List.of("pilot-customers")),
+                    jsonFlag(
+                            "maintenance-banner",
+                            "Maintenance Banner",
+                            "Controls the synthetic read-only maintenance experience and backend guard.",
+                            maintenanceVariation(false),
+                            maintenanceVariation(true),
                             List.of("pilot-customers")));
 
     private LaunchDarklyBootstrap() {}
@@ -287,6 +304,15 @@ public final class LaunchDarklyBootstrap {
                 instructions.add(instruction);
             }
         }
+        if ("maintenance-banner".equals(flag.key())
+                && !hasFallthroughVariation(environmentNode, variationIndex)) {
+            instructions.add(
+                    Map.of(
+                            "kind",
+                            "updateFallthroughVariationOrRollout",
+                            "variationId",
+                            variationId));
+        }
         if (!instructions.isEmpty()) {
             Map<String, Object> body = new LinkedHashMap<>();
             body.put(
@@ -366,6 +392,12 @@ public final class LaunchDarklyBootstrap {
             }
         }
         return false;
+    }
+
+    private static boolean hasFallthroughVariation(
+            JsonNode environmentNode, int targetVariationIndex) {
+        return environmentNode.path("fallthrough").path("variation").asInt(-1)
+                == targetVariationIndex;
     }
 
     private static Optional<JsonNode> findVariation(JsonNode flagNode, Object value) {
@@ -510,6 +542,44 @@ public final class LaunchDarklyBootstrap {
                 segmentTargets);
     }
 
+    private static FlagSpec jsonFlag(
+            String key,
+            String name,
+            String description,
+            Map<String, Object> safeValue,
+            Map<String, Object> targetValue,
+            List<String> segmentTargets) {
+        return new FlagSpec(
+                key,
+                name,
+                "multivariate",
+                description,
+                List.of(
+                        new VariationSpec(safeValue, "Maintenance off"),
+                        new VariationSpec(targetValue, "Maintenance on")),
+                safeValue,
+                targetValue,
+                false,
+                List.of(),
+                segmentTargets);
+    }
+
+    private static Map<String, Object> maintenanceVariation(boolean enabled) {
+        return Map.of(
+                "enabled",
+                enabled,
+                "mode",
+                "read-only",
+                "title",
+                "Scheduled maintenance",
+                "message",
+                enabled
+                        ? "Transfers are temporarily paused while we perform maintenance."
+                        : "Services are operating normally.",
+                "eta",
+                enabled ? "Expected recovery: shortly" : "No maintenance scheduled");
+    }
+
     private static void printPlan(String project, String environment, boolean apply) {
         System.out.printf(
                 "%s LaunchDarkly bootstrap%nProject: %s%nEnvironment: %s%n",
@@ -525,7 +595,8 @@ public final class LaunchDarklyBootstrap {
                                 "  segment %-25s user.%s equals %s%n",
                                 segment.key(), segment.attribute(), segment.value()));
         System.out.println("  targeting state: OFF for every flag; fallthrough/off: safe value");
-        System.out.println("  maintenance-banner: reserved only; no application consumer yet");
+        System.out.println(
+                "  maintenance-banner: pilot target shows a read-only experience with backend guard");
     }
 
     private static Map<String, String> loadDotEnv() throws IOException {

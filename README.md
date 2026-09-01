@@ -71,12 +71,14 @@ External writes require all environment variables plus both `--apply` and `--con
 ## What to demonstrate
 
 - `client-new-payment-ui`: browser-side legacy/new payment experience; never authorization.
+- `client-new-home-experience`: browser-side A/B test for standard versus personalized home; never authorization.
 - Individual targeting: one exact synthetic key.
 - `bank-employees` and `pilot-customers` segment behavior.
 - Stable SHA-256 percentage rollout across `demo-user-001` … `demo-user-100`.
 - Payment migration: Off → Shadow → Live → Complete.
 - Payment v2 kill switch and dependency failure fallback.
 - DTM timeout/unavailable and provider failure with honest sources.
+- Maintenance banner with a backend-enforced read-only guard and an explicit backend guard check.
 - Complete Profile → Fraud → Payment → Notification timeline.
 
 Use [the detailed Thai presenter runbook](docs/DEMO-SCRIPT-TH.md) for the exact clicks, talking points, expected results, cleanup, and Mock Mode fallback.

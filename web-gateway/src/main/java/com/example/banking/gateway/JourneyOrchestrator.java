@@ -5,9 +5,11 @@ import com.example.banking.contracts.DecisionSource;
 import com.example.banking.contracts.FlagKey;
 import com.example.banking.contracts.FraudContracts;
 import com.example.banking.contracts.JourneyContracts;
+import com.example.banking.contracts.MaintenanceContracts;
 import com.example.banking.contracts.NotificationContracts;
 import com.example.banking.contracts.PaymentContracts;
 import com.example.banking.contracts.ProfileContracts;
+import com.example.banking.support.FlagDecisionClient;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -22,13 +25,25 @@ import org.springframework.web.client.RestClient;
 public class JourneyOrchestrator {
     private static final Logger LOGGER = LoggerFactory.getLogger(JourneyOrchestrator.class);
     private final Map<String, RestClient> clients;
+    private final FlagDecisionClient flagDecisionClient;
 
     public JourneyOrchestrator(Map<String, RestClient> backendClients) {
+        this(backendClients, null);
+    }
+
+    @Autowired
+    public JourneyOrchestrator(
+            Map<String, RestClient> backendClients, FlagDecisionClient flagDecisionClient) {
         this.clients = backendClients;
+        this.flagDecisionClient = flagDecisionClient;
     }
 
     public JourneyContracts.Response run(JourneyContracts.Request request) {
         String correlationId = UUID.randomUUID().toString();
+        MaintenanceContracts.Status maintenance = maintenance(request, correlationId);
+        if (maintenance.enabled()) {
+            return maintenanceResponse(request, correlationId, maintenance);
+        }
         ProfileContracts.Response profile = profile(request, correlationId);
         FraudContracts.Response fraud = fraud(request, correlationId);
         PaymentContracts.Response payment = payment(request, correlationId);
@@ -76,7 +91,69 @@ public class JourneyOrchestrator {
                 fraud,
                 payment,
                 notification,
-                List.copyOf(timeline));
+                List.copyOf(timeline),
+                maintenance);
+    }
+
+    private MaintenanceContracts.Status maintenance(
+            JourneyContracts.Request request, String correlationId) {
+        if (flagDecisionClient == null) {
+            return MaintenanceContracts.Status.safeDefault(correlationId);
+        }
+        var evaluation =
+                flagDecisionClient.evaluate(
+                        FlagKey.MAINTENANCE_BANNER, request.context(), correlationId);
+        return new MaintenanceContracts.Status(
+                MaintenanceContracts.Configuration.from(evaluation.value()),
+                DecisionMetadata.from("web-gateway", evaluation));
+    }
+
+    private JourneyContracts.Response maintenanceResponse(
+            JourneyContracts.Request request,
+            String correlationId,
+            MaintenanceContracts.Status maintenance) {
+        DecisionMetadata decision = maintenance.decision();
+        MaintenanceContracts.Configuration configuration = maintenance.configuration();
+        ProfileContracts.Response profile =
+                new ProfileContracts.Response(
+                        "legacy",
+                        "Synthetic Customer",
+                        request.context().tier(),
+                        Map.of("theme", "classic"),
+                        decision);
+        FraudContracts.Response fraud = new FraudContracts.Response("v1", "not-run", 0, decision);
+        PaymentContracts.Response payment =
+                new PaymentContracts.Response(
+                        false,
+                        "SYN-MAINTENANCE",
+                        List.of(),
+                        "none",
+                        "not-run",
+                        "maintenance",
+                        configuration.message(),
+                        false,
+                        List.of(decision));
+        NotificationContracts.Response notification =
+                new NotificationContracts.Response("not-sent-maintenance", "provider-a", decision);
+        JourneyContracts.TimelineEvent event =
+                new JourneyContracts.TimelineEvent(
+                        "web-gateway",
+                        "Maintenance guard enforced",
+                        "%s · %s · no payment services called"
+                                .formatted(configuration.title(), configuration.message()),
+                        decision.source().value(),
+                        false,
+                        Instant.now());
+        return new JourneyContracts.Response(
+                correlationId,
+                false,
+                false,
+                profile,
+                fraud,
+                payment,
+                notification,
+                List.of(event),
+                maintenance);
     }
 
     private ProfileContracts.Response profile(

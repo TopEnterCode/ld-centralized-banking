@@ -42,6 +42,7 @@ public class DemoControlController {
             case "rollout" -> state.rolloutPercentage(parsePercentage(request.value()));
             case "migration" -> state.migrationStage(parseMigration(request.value()));
             case "kill-switch" -> state.killSwitch(Boolean.parseBoolean(request.value()));
+            case "maintenance" -> state.maintenanceEnabled(Boolean.parseBoolean(request.value()));
             case "provider-failure" -> state.providerUnavailable(true);
             case "restore-provider" -> state.providerUnavailable(false);
             case "dtm-failure" -> state.dtmUnavailable(true);

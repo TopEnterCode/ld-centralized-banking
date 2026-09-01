@@ -34,5 +34,6 @@ public final class JourneyContracts {
             FraudContracts.Response fraud,
             PaymentContracts.Response payment,
             NotificationContracts.Response notification,
-            List<TimelineEvent> timeline) {}
+            List<TimelineEvent> timeline,
+            MaintenanceContracts.Status maintenance) {}
 }

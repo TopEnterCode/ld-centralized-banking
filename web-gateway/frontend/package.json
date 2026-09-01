@@ -9,7 +9,9 @@
     "verify": "npm run check && npm run build"
   },
   "dependencies": {
-    "@launchdarkly/js-client-sdk": "4.9.4"
+    "@launchdarkly/js-client-sdk": "4.9.4",
+    "@launchdarkly/observability": "1.1.19",
+    "@launchdarkly/session-replay": "1.1.19"
   },
   "devDependencies": {
     "typescript": "5.9.2",

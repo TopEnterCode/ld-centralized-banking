@@ -20,7 +20,7 @@ class SyntheticPersonasTest {
     void onlyRequiredFlagIsBrowserVisible() {
         assertThat(java.util.Arrays.stream(FlagKey.values()).filter(FlagKey::clientSide))
                 .extracting(FlagKey::key)
-                .containsExactly("client-new-payment-ui");
+                .containsExactly("client-new-payment-ui", "client-new-home-experience");
     }
 
     @Test

@@ -118,6 +118,7 @@ class BrowserJourneyE2ETest {
     void migrationKillSwitchAndCompleteJourneyAreVisible() {
         Page page = newPage(1440, 900);
         page.navigate(baseUrl);
+        openTransfer(page);
         for (String stage : new String[] {"Off", "Shadow", "Live", "Complete"}) {
             clickControl(
                     page,
@@ -164,6 +165,7 @@ class BrowserJourneyE2ETest {
     void failuresProduceHonestDegradedTimeline() {
         Page page = newPage(1440, 900);
         page.navigate(baseUrl);
+        openTransfer(page);
         clickControl(
                 page,
                 page.getByRole(
@@ -205,7 +207,7 @@ class BrowserJourneyE2ETest {
         clickControl(
                 page,
                 page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Reset demo")));
-        assertThat(page.locator("#payment-panel")).isVisible();
+        assertThat(page.locator("#mobile-home")).isVisible();
         assertThat(page.locator("#payment-result")).isHidden();
         assertThat(page.locator("#timeline")).containsText("Run a synthetic payment");
         assertThat(page.locator("#correlation-id")).hasText("No journey yet");
@@ -220,6 +222,7 @@ class BrowserJourneyE2ETest {
         clickControl(
                 page,
                 page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Reset demo")));
+        openTransfer(page);
         clickControl(
                 page,
                 page.getByRole(
@@ -237,6 +240,7 @@ class BrowserJourneyE2ETest {
         clickControl(
                 page,
                 page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Reset demo")));
+        openTransfer(page);
         clickControl(
                 page,
                 page.getByRole(
@@ -254,6 +258,38 @@ class BrowserJourneyE2ETest {
 
     @Test
     @Order(6)
+    void maintenanceModeGuardsBothBrowserAndBackend() {
+        Page page = newPage(1440, 900);
+        page.navigate(baseUrl);
+        clickControl(page, page.locator("[data-action='reset']"));
+        clickControl(
+                page,
+                page.getByRole(
+                        AriaRole.BUTTON,
+                        new Page.GetByRoleOptions().setName("Enable maintenance").setExact(true)));
+
+        assertThat(page.locator("#maintenance-banner")).isVisible();
+        assertThat(page.locator("#submit-payment")).isDisabled();
+        page.getByRole(
+                        AriaRole.BUTTON,
+                        new Page.GetByRoleOptions().setName("Test backend guard").setExact(true))
+                .click();
+        assertThat(page.locator("#result-version")).hasText("PAUSED");
+        assertThat(page.locator("#timeline")).containsText("no payment services called");
+
+        page.locator("#new-payment").click();
+        clickControl(
+                page,
+                page.getByRole(
+                        AriaRole.BUTTON,
+                        new Page.GetByRoleOptions().setName("Disable maintenance").setExact(true)));
+        assertThat(page.locator("#maintenance-banner")).isHidden();
+        assertThat(page.locator("#submit-payment")).isEnabled();
+        page.close();
+    }
+
+    @Test
+    @Order(7)
     void capturesRequiredPresentationViewportsWithoutHorizontalOverflow() throws Exception {
         Files.createDirectories(Path.of("screenshots"));
         for (int[] viewport : new int[][] {{1440, 900}, {1366, 768}}) {
@@ -287,6 +323,10 @@ class BrowserJourneyE2ETest {
         Page page = context.newPage();
         page.setDefaultTimeout(10000);
         return page;
+    }
+
+    private static void openTransfer(Page page) {
+        page.locator("#open-transfer").click();
     }
 
     private static void clickControl(Page page, Locator button) {

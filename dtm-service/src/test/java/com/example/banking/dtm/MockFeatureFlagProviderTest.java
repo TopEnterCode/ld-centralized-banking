@@ -88,6 +88,17 @@ class MockFeatureFlagProviderTest {
                 .isFalse();
     }
 
+    @Test
+    void maintenanceControlReturnsSharedJsonConfiguration() {
+        state.maintenanceEnabled(true);
+
+        var decision = provider.evaluate(FlagKey.MAINTENANCE_BANNER, SyntheticPersonas.MALI_PILOT);
+
+        assertThat(decision.value().path("enabled").asBoolean()).isTrue();
+        assertThat(decision.value().path("mode").asText()).isEqualTo("read-only");
+        assertThat(decision.value().path("title").asText()).isEqualTo("Scheduled maintenance");
+    }
+
     private long enabledCount() {
         return SyntheticPersonas.rolloutUsers().stream()
                 .filter(

@@ -23,12 +23,26 @@
 
       <nav class="tabs" aria-label="POC views">
         <button class="tab active" data-tab="demo">Live demo</button>
+        <button class="tab" data-tab="monitoring">Monitoring</button>
         <button class="tab" data-tab="architecture">Architecture</button>
         <button class="tab" data-tab="explanation">How it works</button>
         <div class="tab-context"><span>Selected context</span><strong id="nav-persona">somchai-employee</strong></div>
       </nav>
 
       <main>
+        <section id="maintenance-banner" class="maintenance-banner hidden" aria-live="polite" role="status">
+          <div class="maintenance-icon">!</div>
+          <div class="maintenance-copy">
+            <p class="eyebrow">CONTROLLED SERVICE WINDOW</p>
+            <h2 id="maintenance-title">Scheduled maintenance</h2>
+            <p id="maintenance-message">Transfers are temporarily paused.</p>
+            <small id="maintenance-eta">Expected recovery: shortly</small>
+          </div>
+          <div class="maintenance-actions">
+            <span>Frontend guard + backend guard active</span>
+            <button id="maintenance-backend-check" class="maintenance-check">Test backend guard</button>
+          </div>
+        </section>
         <section id="view-demo" class="view active" aria-label="Interactive banking demo">
           <div class="demo-layout">
             <article class="phone-column">
@@ -36,36 +50,71 @@
               <div class="phone-shell">
                 <div class="phone-sensor"></div>
                 <div class="phone-screen">
-                  <div class="mobile-head">
-                    <div class="mobile-logo">SB</div>
-                    <div><small>Good afternoon</small><strong id="phone-name">Synthetic customer</strong></div>
-                    <button aria-label="Synthetic notifications" class="icon-button">●</button>
-                  </div>
-                  <div id="account-card" class="account-card">
-                    <div class="account-title"><span>Everyday account</span><small>DEMO •••• 2048</small></div>
-                    <p class="balance-label">Available balance</p>
-                    <p class="balance">฿245,680<span>.50</span></p>
-                    <div class="account-actions"><span>↑<small>Pay</small></span><span>↓<small>Receive</small></span><span>⋯<small>More</small></span></div>
-                  </div>
-                  <div id="payment-panel" class="payment-panel">
-                    <div class="feature-heading">
-                      <div><span id="ui-version-chip">LEGACY UI</span><h2 id="payment-heading">Quick transfer</h2></div>
-                      <span id="client-flag-dot" class="flag-dot off" title="Client flag off"></span>
+                  <div id="mobile-home" class="mobile-home">
+                    <div class="mobile-head home-head">
+                      <button aria-label="Security status" class="icon-button">♙</button>
+                      <div><small>สวัสดี</small><strong id="phone-name">Synthetic customer</strong><em id="home-experience-label">STANDARD HOME</em></div>
+                      <button aria-label="Synthetic notifications" class="icon-button">⌂</button>
                     </div>
-                    <label for="recipient">Synthetic recipient</label>
-                    <input id="recipient" value="Demo Merchant – Riverside" maxlength="60" />
-                    <label for="amount">Amount (THB)</label>
-                    <div class="money-input"><span>฿</span><input id="amount" type="number" min="1" max="50000" step="0.01" value="1250.00" /></div>
-                    <div id="new-ui-benefit" class="smart-review hidden"><span>✦</span><div><strong>Smart payment review</strong><small>New UI enabled by a browser flag</small></div></div>
-                    <button id="submit-payment" class="primary-action">Review &amp; send</button>
-                    <p class="safety-note">Simulation only · No authentication or money movement</p>
+                    <div class="home-scroll">
+                      <div id="home-maintenance-hint" class="home-maintenance-hint hidden">
+                        <span>!</span><div><strong>บริการบางรายการหยุดชั่วคราว</strong><small>แตะเพื่อดูรายละเอียด</small></div>
+                      </div>
+                      <div class="service-grid" aria-label="Banking services">
+                        <button id="open-transfer" class="service-tile"><span class="service-icon transfer-icon">↗</span><strong>โอนเงิน</strong></button>
+                        <button class="service-tile demo-tile"><span class="service-icon topup-icon">↑</span><strong>เติมเงิน</strong></button>
+                        <button class="service-tile demo-tile"><span class="service-icon pay-icon">▣</span><strong>จ่ายเงิน</strong></button>
+                        <button class="service-tile demo-tile"><span class="service-icon scan-icon">▦</span><strong>สแกน</strong></button>
+                        <button class="service-tile demo-tile"><span class="service-icon promptpay-icon">PP</span><strong>พร้อมเพย์</strong></button>
+                        <button class="service-tile demo-tile"><span class="service-icon gift-icon">♢</span><strong>สิทธิพิเศษ</strong></button>
+                        <button class="service-tile demo-tile"><span class="service-icon rabbit-icon">R</span><strong>แรบบิท<br>LINE Pay</strong></button>
+                        <button class="service-tile demo-tile"><span class="service-icon queue-icon">◉</span><strong>คิวรอรับ<br>เงิน</strong></button>
+                      </div>
+                      <section class="offers-section">
+                        <div class="offers-heading"><strong>ข้อเสนอพิเศษ</strong><span>ดูทั้งหมด ›</span></div>
+                        <div class="offer-card"><div class="offer-art"><span>✦</span><span>◎</span><span>◇</span></div><div><small id="offer-kicker">สิทธิพิเศษ</small><strong id="offer-title">สำหรับผู้ใช้บริการ<br>ผ่านธนาคารออนไลน์</strong><em id="offer-link">ดูรายละเอียด &gt;&gt;</em></div></div>
+                      </section>
+                    </div>
+                    <nav class="mobile-bottom-nav" aria-label="Main navigation">
+                      <button class="nav-item active"><span>⌂</span><small>หน้าหลัก</small></button><button class="nav-item demo-nav"><span>▣</span><small>บัญชี</small></button><button class="nav-item demo-nav"><span>≡</span><small>ธุรกรรม</small></button><button class="nav-item demo-nav"><span>▥</span><small>การลงทุน</small></button><button class="nav-item demo-nav"><span>•••</span><small>เพิ่มเติม</small></button>
+                    </nav>
                   </div>
-                  <div id="payment-result" class="payment-result hidden" aria-live="polite">
-                    <div class="success-ring">✓</div>
-                    <h2>Payment simulated</h2>
-                    <p id="result-reference">SYN-REFERENCE</p>
-                    <div class="result-route"><span>Authoritative API</span><strong id="result-version">v1</strong></div>
-                    <button id="new-payment" class="secondary-action">New simulation</button>
+
+                  <div id="transfer-view" class="mobile-route hidden">
+                    <div class="route-head"><button id="back-home" class="route-back" aria-label="Back to home">‹</button><strong>โอนเงิน</strong><span class="route-help">?</span></div>
+                    <div class="route-scroll">
+                      <div id="account-card" class="account-card">
+                        <div class="account-title"><span>บัญชีหลัก</span><small>DEMO •••• 2048</small></div>
+                        <p class="balance-label">ยอดเงินที่ใช้ได้</p>
+                        <p class="balance">฿245,680<span>.50</span></p>
+                        <div class="account-actions"><span>↑<small>จ่าย</small></span><span>↓<small>รับเงิน</small></span><span>⋯<small>เพิ่มเติม</small></span></div>
+                      </div>
+                      <div id="payment-panel" class="payment-panel">
+                        <div class="feature-heading">
+                          <div><span id="ui-version-chip">LEGACY UI</span><h2 id="payment-heading">Quick transfer</h2></div>
+                          <span id="client-flag-dot" class="flag-dot off" title="Client flag off"></span>
+                        </div>
+                        <label for="recipient">ผู้รับเงิน (ข้อมูลสังเคราะห์)</label>
+                        <input id="recipient" value="Demo Merchant – Riverside" maxlength="60" />
+                        <label for="amount">จำนวนเงิน (บาท)</label>
+                        <div class="money-input"><span>฿</span><input id="amount" type="number" min="1" max="50000" step="0.01" value="1250.00" /></div>
+                        <div id="new-ui-benefit" class="smart-review hidden"><span>✦</span><div><strong>Smart payment review</strong><small>New UI enabled by a browser flag</small></div></div>
+                        <button id="submit-payment" class="primary-action">ตรวจสอบและส่ง</button>
+                        <p class="safety-note">Simulation only · No authentication or money movement</p>
+                      </div>
+                      <div id="payment-result" class="payment-result hidden" aria-live="polite">
+                        <div id="result-icon" class="success-ring">✓</div>
+                        <h2 id="result-heading">Payment simulated</h2>
+                        <p id="result-reference">SYN-REFERENCE</p>
+                        <div class="result-route"><span id="result-route-label">Authoritative API</span><strong id="result-version">v1</strong></div>
+                        <button id="new-payment" class="secondary-action">ทำรายการใหม่</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div id="mobile-maintenance" class="mobile-maintenance hidden">
+                    <div class="maintenance-route-head"><button id="maintenance-home" class="route-back" aria-label="Back to home">‹</button><span>สถานะบริการ</span></div>
+                    <div class="maintenance-screen-content"><div class="maintenance-illustration">!</div><h2 id="mobile-maintenance-title">กำลังปรับปรุงบริการ</h2><p id="mobile-maintenance-message">ขออภัย ขณะนี้บริการโอนเงินไม่พร้อมใช้งานชั่วคราว</p><small id="mobile-maintenance-eta">โปรดลองอีกครั้งในภายหลัง</small><button id="maintenance-home-action" class="maintenance-home-action">กลับหน้าหลัก</button></div>
                   </div>
                 </div>
               </div>
@@ -116,6 +165,12 @@
                     <button class="restore" data-action="restore-all" data-value="">Restore all services</button>
                   </div>
                 </section>
+                <section class="control-group">
+                  <div class="control-label"><span>5</span><div><strong>Maintenance mode</strong><small>Shared frontend and backend guard</small></div></div>
+                  <div class="segmented two">
+                    <button data-action="maintenance" data-value="true">Enable maintenance</button><button data-action="maintenance" data-value="false">Disable maintenance</button>
+                  </div>
+                </section>
               </div>
               <div id="control-toast" class="control-toast" aria-live="polite">Ready for presenter input</div>
             </aside>
@@ -151,6 +206,62 @@
                 <div class="grid-legend"><span><i class="enabled"></i>New experience</span><span><i></i>Safe default</span><small id="disabled-count">100 disabled</small></div>
               </article>
             </section>
+          </div>
+        </section>
+
+        <section id="view-monitoring" class="view monitoring-view" aria-label="Synthetic flag monitoring">
+          <div class="monitoring-hero">
+            <div>
+              <p class="eyebrow">SYNTHETIC OBSERVABILITY</p>
+              <h2>Monitor every flag across the delivery lifecycle.</h2>
+              <p>Explore deterministic demo telemetry for flag history, releases, error logs, traces, and sessions. Every row is linked to a registered flag key.</p>
+            </div>
+            <div class="monitoring-toolbar">
+              <label for="monitoring-flag-filter">Filter by flag</label>
+              <select id="monitoring-flag-filter">
+                <option value="all">All registered flags</option>
+              </select>
+              <span id="monitoring-source" class="monitoring-source">Synthetic data</span>
+              <button id="send-synthetic-error" class="monitoring-action">Emit synthetic error</button>
+              <button id="send-synthetic-log" class="monitoring-action log-action">Emit synthetic log</button>
+            </div>
+          </div>
+
+          <div class="monitoring-metrics">
+            <article><span class="metric-icon blue">F</span><div><small>Registered flags</small><strong id="monitoring-flag-count">0</strong></div></article>
+            <article><span class="metric-icon purple">R</span><div><small>Releases</small><strong id="monitoring-release-count">0</strong></div></article>
+            <article><span class="metric-icon amber">!</span><div><small>Error logs</small><strong id="monitoring-error-count">0</strong></div></article>
+            <article><span class="metric-icon cyan">T</span><div><small>Traces</small><strong id="monitoring-trace-count">0</strong></div></article>
+            <article><span class="metric-icon green">S</span><div><small>Sessions</small><strong id="monitoring-session-count">0</strong></div></article>
+            <article><span class="metric-icon red">%</span><div><small>Error rate</small><strong id="monitoring-error-rate">0%</strong></div></article>
+          </div>
+
+          <article class="flag-inventory-card">
+            <div class="card-heading"><div><p class="eyebrow">FLAG INVENTORY</p><h2>Health by registered flag</h2></div><span id="monitoring-generated-at">Generated at —</span></div>
+            <div id="flag-monitor-grid" class="flag-monitor-grid"></div>
+          </article>
+
+          <div class="monitoring-grid">
+            <article class="monitor-panel monitor-wide">
+              <div class="monitor-panel-heading"><div><p class="eyebrow">FLAG HISTORY</p><h3>Configuration changes</h3></div><span>audit stream</span></div>
+              <div class="monitor-table monitor-table-history"><div class="monitor-table-head"><span>Flag</span><span>Change</span><span>From → to</span><span>Actor</span><span>Time</span></div><div id="flag-history-list" class="monitor-table-body"></div></div>
+            </article>
+            <article class="monitor-panel">
+              <div class="monitor-panel-heading"><div><p class="eyebrow">RELEASES</p><h3>Rollout activity</h3></div><span>deployments</span></div>
+              <div class="monitor-table monitor-table-releases"><div class="monitor-table-head"><span>Release</span><span>Flag</span><span>Rollout</span><span>Health</span><span>Deployed</span></div><div id="release-list" class="monitor-table-body"></div></div>
+            </article>
+            <article class="monitor-panel">
+              <div class="monitor-panel-heading"><div><p class="eyebrow">ERROR LOGS</p><h3>Flag-related events</h3></div><span>service logs</span></div>
+              <div class="monitor-table monitor-table-errors"><div class="monitor-table-head"><span>Level</span><span>Flag</span><span>Service</span><span>Message</span><span>Time</span></div><div id="error-log-list" class="monitor-table-body"></div></div>
+            </article>
+            <article class="monitor-panel">
+              <div class="monitor-panel-heading"><div><p class="eyebrow">TRACES</p><h3>Decision latency</h3></div><span>distributed spans</span></div>
+              <div class="monitor-table monitor-table-traces"><div class="monitor-table-head"><span>Trace</span><span>Flag</span><span>Service</span><span>Latency</span><span>Status</span></div><div id="trace-list" class="monitor-table-body"></div></div>
+            </article>
+            <article class="monitor-panel">
+              <div class="monitor-panel-heading"><div><p class="eyebrow">SESSIONS</p><h3>Variation exposure</h3></div><span>synthetic users</span></div>
+              <div class="monitor-table monitor-table-sessions"><div class="monitor-table-head"><span>Session</span><span>Persona</span><span>Flag</span><span>Variation</span><span>Platform</span><span>Events</span></div><div id="session-list" class="monitor-table-body"></div></div>
+            </article>
           </div>
         </section>
 
@@ -191,4 +302,3 @@
     <script type="module" src="/src/app.ts"></script>
   </body>
 </html>
-

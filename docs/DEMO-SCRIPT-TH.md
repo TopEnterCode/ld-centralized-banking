@@ -20,15 +20,18 @@
 | Flag | หน้าที่ | ค่าเป้าหมายของ Pilot | ค่าปลอดภัยเมื่อปิด |
 |---|---|---|---|
 | `client-new-payment-ui` | เปลี่ยนหน้าจอโอนเงินใน Browser | New UI | Legacy UI |
+| `client-new-home-experience` | A/B หน้า Home แบบ Standard/Personalized | Personalized Home | Standard Home |
 | `profile-response-v2` | เลือกรูปแบบ Profile response | v2 | legacy |
 | `fraud-engine-version` | เลือก Fraud engine | v2 | v1 |
 | `payment-api-migration` | กำหนดขั้นการย้าย Payment API | shadow/live/complete | off |
 | `payment-v2-enabled` | Kill switch ของ Payment v2 | true | false หรือใช้ v1 |
 | `notification-provider` | เลือก Notification provider | provider-b | provider-a |
+| `maintenance-banner` | แสดง Maintenance banner และหยุด synthetic write journey | JSON enabled | normal experience |
 
 กฎที่เตรียมไว้ใน Environment `Devolopment` คือ:
 
 - `client-new-payment-ui`: Mali แบบ individual target, Segment `Bank Employees` และ Segment `Pilot Customers` ได้ New UI
+- `client-new-home-experience`: Mali แบบ individual target, Segment `Bank Employees` และ Segment `Pilot Customers` ได้ Personalized Home
 - Flag ฝั่ง Server อีกห้าตัว: Segment `Pilot Customers` ได้ค่ารุ่นใหม่
 - ทุก Flag ยังปิดอยู่ก่อนเริ่มเดโม เพื่อให้ระบบเริ่มจาก safe baseline
 
@@ -76,7 +79,7 @@
    - Project: `Centrailized Banking`
    - เมนู `Features` → `Flags`
    - เลือก Environment `Devolopment`
-   - ตรวจว่า Flag ทั้งหกตัวแสดง `Devolopment: Off`
+   - ตรวจว่า Flag ทั้งแปดตัวแสดง `Devolopment: Off`
 
 8. จัดหน้าต่างสองหน้าต่างวางข้างกัน:
 
@@ -131,8 +134,10 @@ Docker image ยังอยู่ ไม่ต้อง Build ใหม่ท�
 
 1. ที่แอปกดแท็บ `Live demo`
 2. เลือก `Narin · general customer`
-3. ชี้ที่ Badge `LAUNCHDARKLY LIVE`, ข้อความ `LaunchDarkly connected` และ `5/5 healthy`
-4. ชี้ที่ Chip `LEGACY UI` และหัวข้อ `Quick transfer`
+3. ชี้หน้า Home ของ mobile simulator: เมนู `โอนเงิน`, `เติมเงิน`, `จ่ายเงิน`, `สแกน`, ข้อเสนอพิเศษ และ bottom navigation
+4. กดเมนู `โอนเงิน` เพื่อเข้า flow โอนเงิน
+5. ชี้ที่ Badge `LAUNCHDARKLY LIVE`, ข้อความ `LaunchDarkly connected` และ `5/5 healthy`
+6. ชี้ที่ Chip `LEGACY UI` และหัวข้อ `Quick transfer`
 
 สิ่งที่พูด:
 
@@ -145,6 +150,8 @@ Docker image ยังอยู่ ไม่ต้อง Build ใหม่ท�
 - Narin เห็น `LEGACY UI`
 - Timeline ยังแสดง `Run a synthetic payment`
 - ตาราง rollout เป็นค่า safe default
+
+หน้า Home เป็น presentation ของ Banking app ส่วนแผง `Presenter controls` เป็นพื้นที่ควบคุม synthetic scenario สำหรับผู้พรีเซนต์
 
 ### ช่วงที่ 2 — อธิบาย Architecture (นาที 2–4)
 
@@ -185,7 +192,7 @@ Docker image ยังอยู่ ไม่ต้อง Build ใหม่ท�
 สิ่งที่กดในแอป:
 
 1. เลือก `Narin · general customer`
-2. ชี้ว่า Narin ยังเป็น `LEGACY UI` และ `Quick transfer`
+2. กด `โอนเงิน` แล้วชี้หน้าจอ `Quick transfer`
 3. เลือก `Somchai · employee · preferred`
 4. ชี้ว่าเปลี่ยนเป็น `NEW UI` และ `Smart transfer`
 5. เลือก `Mali · pilot customer · iOS`
@@ -199,7 +206,29 @@ Docker image ยังอยู่ ไม่ต้อง Build ใหม่ท�
 
 หมายเหตุ: Mali ตรงทั้ง individual target และ Pilot segment อยู่แล้ว หากต้องการพิสูจน์ individual target แบบแยกจาก Segment จริง ๆ ให้เตรียม Context เพิ่มก่อนวันเดโม อย่าแก้กฎสด ๆ ระหว่างนำเสนอโดยไม่ซ้อม
 
-### ช่วงที่ 4 — เปิด Full Pilot Journey (นาที 7–10)
+### ช่วงที่ 4 — Frontend A/B Test: Home Experience (นาที 7–9)
+
+ใน LaunchDarkly:
+
+1. ไปที่ `Features` → `Flags` → `Client New Home Experience`
+2. ยืนยัน Environment `Devolopment`
+3. ตรวจ Rule ของ Mali/Bank Employees/Pilot Customers ให้ได้ `Personalized Home`
+4. เปิด Flag แล้วกด `Review and save` → ยืนยัน
+
+ในแอป:
+
+1. เลือก `Mali · pilot customer · iOS` หรือ `Somchai · employee · preferred`
+2. กลับ/อยู่ที่หน้า Home แล้วชี้ label `PERSONALIZED HOME`
+3. ชี้สี Home และข้อความข้อเสนอที่เปลี่ยนตาม variation
+4. เลือก `Narin · general customer` เพื่อเปรียบเทียบ `STANDARD HOME`
+
+สิ่งที่พูด:
+
+> “นี่คือ A/B test ฝั่ง Frontend ที่แยกจาก Payment UI คนละ Flag โดย Browser ใช้ Client-side ID ประเมินประสบการณ์ แต่ไม่ได้ตัดสินสิทธิ์หรืออนุมัติธุรกรรม”
+
+หลังจบ ให้ปิด Flag หรือคืน Fallthrough เป็น `Standard Home`
+
+### ช่วงที่ 5 — เปิด Full Pilot Journey (นาที 9–12)
 
 สิ่งที่กดใน LaunchDarkly:
 
@@ -245,7 +274,7 @@ Docker image ยังอยู่ ไม่ต้อง Build ใหม่ท�
 
 > “ขณะนี้ Payment อยู่ Shadow Mode ระบบเรียกทั้ง v1 และ v2 เพื่อเปรียบเทียบผล แต่ v1 ยังเป็นคำตอบ authoritative จึงเก็บข้อมูลความมั่นใจก่อนย้าย traffic จริง”
 
-### ช่วงที่ 5 — Payment Migration: Shadow → Live → Complete (นาที 10–14)
+### ช่วงที่ 6 — Payment Migration: Shadow → Live → Complete (นาที 10–14)
 
 ก่อนเริ่ม ให้ `Payment V2 Enabled` ยังเปิดอยู่
 
@@ -304,7 +333,7 @@ Docker image ยังอยู่ ไม่ต้อง Build ใหม่ท�
 
 > “เมื่อ Complete ระบบหยุดเรียก v1 ในเส้นทางปกติ ลดภาระการทำงานซ้ำ แต่เรายังเก็บ Kill Switch แยกไว้อีกชั้นสำหรับ rollback”
 
-### ช่วงที่ 6 — Kill Switch และ Rollback (นาที 14–16)
+### ช่วงที่ 7 — Kill Switch และ Rollback (นาที 14–16)
 
 สิ่งที่กด:
 
@@ -328,7 +357,27 @@ Docker image ยังอยู่ ไม่ต้อง Build ใหม่ท�
 
 หลังจบส่วนนี้ ให้เปิด `Payment V2 Enabled` กลับ หากยังต้องสาธิต v2 ต่อ
 
-### ช่วงที่ 7 — Percentage Rollout (ตัวเลือกเสริม นาที 16–18)
+### ช่วงที่ 8 — Maintenance Mode: Frontend + Backend Guard (นาที 16–18)
+
+ส่วนนี้ใช้ปุ่ม `Enable maintenance` ใน `Presenter controls` ของ Mock Mode หรือเปิด JSON variation ของ `maintenance-banner` สำหรับ `Pilot Customers` ใน LaunchDarkly Live Mode
+
+ใน Mock Mode:
+
+1. กด `Enable maintenance`
+2. ชี้ว่า mobile simulator เปลี่ยนเป็นหน้าสถานะบริการแบบ Banking app
+3. ชี้ Banner ด้านบนว่า Frontend guard และ Backend guard ทำงานร่วมกัน
+4. ชี้ว่าปุ่มโอนถูกปิดเพื่อป้องกันการเริ่มรายการ
+5. กด `Test backend guard`
+6. ชี้ Timeline `Maintenance guard enforced` และข้อความ `no payment services called`
+7. กด `Disable maintenance`
+
+สิ่งที่พูด:
+
+> “Maintenance ไม่ใช่แค่ป้ายบนหน้าจอ เพราะ Backend ประเมิน Configuration เดียวกันและบล็อก write journey ซ้ำอีกชั้น ต่อให้มี client หรือ request ที่พยายามข้าม UI ก็ไม่เรียกบริการ Payment ต่อ”
+
+ใน Live Mode ให้เปิด `maintenance-banner` ที่ Environment `Devolopment` โดยเลือก JSON variation ที่ `enabled=true` แล้วเลือก Persona Mali เพื่อให้เห็นผลจาก Pilot targeting จากนั้นปิด Flag เพื่อคืนสถานะปกติ
+
+### ช่วงที่ 9 — Percentage Rollout (ตัวเลือกเสริม นาที 18–20)
 
 ส่วนนี้ใช้ `client-new-payment-ui` และตาราง `100-user rollout grid`
 
@@ -347,7 +396,7 @@ Docker image ยังอยู่ ไม่ต้อง Build ใหม่ท�
 
 หลังจบ ให้คืน Default rule เป็น `Legacy UI` หรือปิด Flag เพื่อกลับ Safe Baseline ห้ามทิ้ง Percentage rollout ไว้โดยไม่ตั้งใจ
 
-### ช่วงที่ 8 — ปิดการนำเสนอ (นาที 18–20)
+### ช่วงที่ 10 — ปิดการนำเสนอ (นาที 20–22)
 
 1. ในแอปชี้ที่ `Decision timeline`, source และ Trace ID อีกครั้ง
 2. กดแท็บ `Architecture`
@@ -365,14 +414,16 @@ Docker image ยังอยู่ ไม่ต้อง Build ใหม่ท�
 
 ทำทันทีหลังจบ เพื่อให้ครั้งต่อไปเริ่มจากสถานะที่คาดเดาได้
 
-1. ใน Environment `Devolopment` ปิด Flag ทั้งหกตัว:
+1. ใน Environment `Devolopment` ปิด Flag ทั้งแปดตัว:
 
    - `client-new-payment-ui`
+   - `client-new-home-experience`
    - `profile-response-v2`
    - `fraud-engine-version`
    - `payment-api-migration`
    - `payment-v2-enabled`
    - `notification-provider`
+   - `maintenance-banner`
 
 2. คืน Rule `Pilot Customers` ของ `payment-api-migration` เป็น `shadow`
 3. คืน Default rule ของ `client-new-payment-ui` เป็น `Legacy UI` หากแก้ Percentage rollout
@@ -569,7 +620,7 @@ docker compose logs --tail 100
 - [ ] `5/5 healthy`
 - [ ] Project = `centrailized-banking`
 - [ ] Environment = `devolopment`
-- [ ] Flag ทั้งหกตัวเริ่ม Off
+- [ ] Flag ทั้งแปดตัวเริ่ม Off
 - [ ] เปิดหน้าต่าง LaunchDarkly และแอปวางข้างกัน
 - [ ] ไม่มี credential หรือข้อมูลส่วนตัวบนจอ
 
@@ -583,12 +634,13 @@ docker compose logs --tail 100
 - [ ] Mali full journey และ Decision timeline
 - [ ] Shadow → Live → Complete
 - [ ] Kill Switch กลับ v1
-- [ ] Percentage rollout ถ้ามีเวลา
+   - [ ] Maintenance banner + backend guard
+   - [ ] Percentage rollout ถ้ามีเวลา
 - [ ] สรุป governance, rollout และ fallback
 
 หลังจบ:
 
-- [ ] ปิด Flag ทั้งหกใน Devolopment
+   - [ ] ปิด Flag ทั้งแปดใน Devolopment
 - [ ] คืน Payment migration Pilot rule เป็น shadow
 - [ ] คืน Client default เป็น Legacy UI
 - [ ] ตรวจ Narin เป็น Legacy UI
